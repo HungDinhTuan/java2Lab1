@@ -1,0 +1,11 @@
+Viết hàm thực hiện đọc file thông tin tài khoản ngân hàng lưu trữ các thông tin
+ account user của ngân hàng theo format như sau
+ID|CARDTYPE|NAME|CARDNO|IDCARD|MSISDN|ADDRESS|DATEOFBIRTH
+1|VISA|VAN|423432432|32343242|9835353|Hoang Mai , Ha noi |2002-05-1
+...
+Trong đó CartType là loại thẻ - cần validate (VISA , JCB, HYBRID ), CardNo
+- số cmnd / số căn cước : số chữ số nhất định , MSISDN : số điện thaoji ,
+ IDCARD : số thẻ , DATEOFBIRTH : ngày sinh  - các giá trị cần validate
+- 1 người có thể đăng ký nhiều tk nhưng ko dc cùng loại thẻ
+Yêu cầu  :
+   -  Đọc file và load vào trong 1 collection của trương trình để sử dụng.
