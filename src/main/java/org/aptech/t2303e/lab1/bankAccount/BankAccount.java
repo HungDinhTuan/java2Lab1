@@ -1,4 +1,4 @@
-package org.aptech.t2303e.lab1;
+package org.aptech.t2303e.lab1.bankAccount;
 
 import lombok.Builder;
 import lombok.Data;
@@ -16,4 +16,7 @@ public class BankAccount {
     private String tel;
     private String address;
     private Date dateOfBirth;
+    private int year;
+    private int month;
+    private int day;
 }

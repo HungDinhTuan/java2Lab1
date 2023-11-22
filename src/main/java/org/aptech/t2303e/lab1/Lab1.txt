@@ -1,11 +1,16 @@
-Viết hàm thực hiện đọc file thông tin tài khoản ngân hàng lưu trữ các thông tin
+I . Viết hàm thực hiện đọc file thông tin tài khoản ngân hàng lưu trữ các thông tin
  account user của ngân hàng theo format như sau
 ID|CARDTYPE|NAME|CARDNO|IDCARD|MSISDN|ADDRESS|DATEOFBIRTH
 1|VISA|VAN|423432432|32343242|9835353|Hoang Mai , Ha noi |2002-05-1
 ...
-Trong đó CartType là loại thẻ - cần validate (VISA , JCB, HYBRID ), CardNo
-- số cmnd / số căn cước : số chữ số nhất định , MSISDN : số điện thaoji ,
- IDCARD : số thẻ , DATEOFBIRTH : ngày sinh  - các giá trị cần validate
-- 1 người có thể đăng ký nhiều tk nhưng ko dc cùng loại thẻ
+Trong đó CartType là loại thẻ - cần validate (VISA , JCB, HYBRID ), CardNo  - số thẻ : số chữ số nhất định ,
+ MSISDN : số điện thaoji , IDCARD : số cmnd / số căn cước  ,
+  DATEOFBIRTH : ngày sinh (yyyy-mm-dd)  - các giá trị cần validate
+- 1 người có thể đăng ký nhiều tk nhưng ko dc cùng loại thẻ 
 Yêu cầu  :
-   -  Đọc file và load vào trong 1 collection của trương trình để sử dụng.
+ - Đọc file và load vào trong 1 collection của trương trình để sử dụng.
+||. Viết hàm thực hiện đọc file giao dịch và cập nhật hệ thống .
+Formart file :
+Transid|cardno|amount|transdate
+111111|134557|134.234|2023-11-05 140012
+Thực hiện đọc file giao dịch , validate và cập nhật tài khoản , sau đó lưu thông tin giao dịch vào hệ thống
