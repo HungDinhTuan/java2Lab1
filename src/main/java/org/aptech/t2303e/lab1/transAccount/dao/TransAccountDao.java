@@ -9,4 +9,5 @@ public interface TransAccountDao {
     boolean insertTransAccountDeposit(TransAccount transAccount, double depositNum);
     boolean insertTransAccountWithDraw(TransAccount transAccount, double withdrawNum) throws NotEnoughMoneyException;
     TransAccount findAmountWithTransIdMax(String cardNo);
+    List<TransAccount> findAll(String cardType);
 }

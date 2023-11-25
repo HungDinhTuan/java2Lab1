@@ -1,12 +1,14 @@
 package org.aptech.t2303e.lab1.bankAccount.entity;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
 @Data
-@Builder
+@SuperBuilder
+@ToString(exclude = {"year", "month", "day"})
 public class BankAccount {
     private long id;
     private String cardType;

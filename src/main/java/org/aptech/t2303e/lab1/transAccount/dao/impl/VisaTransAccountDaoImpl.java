@@ -125,6 +125,32 @@ public class VisaTransAccountDaoImpl implements TransAccountDao {
         return null;
     }
 
+    @Override
+    public List<TransAccount> findAll(String cardType) {
+        BankAccountValid baValid = new BankAccountValid();
+        if(baValid.validCardType(cardType) == null) return null;
+        PreparedStatement preSt;
+        String sql = "Select trans_account_table.trans_id, trans_account_table.card_no, trans_account_table.amount, trans_account_table.trans_date_time, trans_account_table.card_no\n" +
+                "from trans_account_table INNER JOIN bank_account_table ON trans_account_table.card_no=bank_account_table.card_no\n" +
+                "WHERE bank_account_table.card_type = ?";
+        List<TransAccount> jcbTransAccounts = new ArrayList<>();
+        Connection conn = Datasource.getConn();
+        try{
+            preSt = conn.prepareStatement(sql);
+            preSt.setString(1, cardType);
+            ResultSet rs = preSt.executeQuery();
+            while (rs.next()){
+                TransAccount acc = rowMapper(rs);
+                if (!Objects.isNull(acc)) jcbTransAccounts.add(acc);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return jcbTransAccounts;
+    }
+
     public static VisaTransAccount rowMapper(ResultSet rs) {
         VisaTransAccount visaTransAcc = null;
         long transId = 0;
