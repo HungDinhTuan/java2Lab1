@@ -1,4 +1,4 @@
-package org.aptech.t2303e.lab1.bankAccount;
+package org.aptech.t2303e.lab1.bankAccount.entity;
 
 import lombok.Builder;
 import lombok.Data;

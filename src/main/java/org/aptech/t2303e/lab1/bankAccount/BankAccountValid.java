@@ -1,7 +1,8 @@
 package org.aptech.t2303e.lab1.bankAccount;
 
-import org.aptech.t2303e.lab1.bankAccount.bankAccountDao.BankAccountDao;
-import org.aptech.t2303e.lab1.bankAccount.bankAccountDao.BankAccountDaoImpl;
+import org.aptech.t2303e.lab1.bankAccount.dao.BankAccountDao;
+import org.aptech.t2303e.lab1.bankAccount.dao.impl.BankAccountDaoImpl;
+import org.aptech.t2303e.lab1.bankAccount.entity.BankAccount;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

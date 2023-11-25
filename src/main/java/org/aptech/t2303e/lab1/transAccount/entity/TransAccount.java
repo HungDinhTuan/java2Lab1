@@ -1,8 +1,8 @@
-package org.aptech.t2303e.lab1.transAccount;
+package org.aptech.t2303e.lab1.transAccount.entity;
 
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.aptech.t2303e.lab1.transAccount.exceptionTransAcc.NotEnoughMoneyException;
+import org.aptech.t2303e.lab1.transAccount.exception.NotEnoughMoneyException;
 
 import java.time.LocalDateTime;
 
@@ -13,13 +13,10 @@ import java.time.LocalDateTime;
 public abstract class TransAccount {
     private long transId;
     private String cardNo;
-    private double amount;
+    private double amount = 0;
     private LocalDateTime transDateTime;
 
-    public double deposit(double num){
-        this.amount += num;
-        return getAmount();
-    }
+    public abstract double deposit(double depositNum);
 
     public abstract double withDraw(double num) throws NotEnoughMoneyException;
 }

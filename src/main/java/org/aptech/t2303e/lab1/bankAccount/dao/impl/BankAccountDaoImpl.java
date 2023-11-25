@@ -1,8 +1,10 @@
-package org.aptech.t2303e.lab1.bankAccount.bankAccountDao;
+package org.aptech.t2303e.lab1.bankAccount.dao.impl;
 
 import org.aptech.t2303e.config.properties.Datasource;
-import org.aptech.t2303e.lab1.bankAccount.BankAccount;
+import org.aptech.t2303e.lab1.bankAccount.entity.BankAccount;
 import org.aptech.t2303e.lab1.bankAccount.BankAccountValid;
+import org.aptech.t2303e.lab1.bankAccount.dao.BankAccountDao;
+import org.aptech.t2303e.lab1.transAccount.TransAccountValid;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,26 +12,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-public class BankAccountDaoImpl implements BankAccountDao{
+public class BankAccountDaoImpl implements BankAccountDao {
 
     public static void main(String[] args) {
         
         BankAccountDao bankAcc = new BankAccountDaoImpl();
         bankAcc.getBankAccByIdCard("123456789123");
-        boolean result = bankAcc.insertBankAcc(BankAccount.builder()
-                .cardType("VISA")
-                .name("Le Tuan Ha")
-                .cardNo("123456789119")
-                .idCard("123456789122")
-                .tel("0123456788")
-                .address("ha noi")
-                .year(1993)
-                .month(8)
-                .day(16)
-                .build());
-        if(result) System.err.println("Insert success.");
+//        boolean result = bankAcc.insertBankAcc(BankAccount.builder()
+//                .cardType("VISA")
+//                .name("Le Tuan Ha")
+//                .cardNo("123456789119")
+//                .idCard("123456789122")
+//                .tel("0123456788")
+//                .address("ha noi")
+//                .year(1993)
+//                .month(8)
+//                .day(16)
+//                .build());
+//        if(result) System.err.println("Insert success.");
 
-//        System.err.println(bankAcc.getBankAccByIdCard("123456789122"));
+        System.err.println(bankAcc.getBankAccByIdCard("123456789122"));
     }
 
     @Override
@@ -90,7 +92,10 @@ public class BankAccountDaoImpl implements BankAccountDao{
         }catch (Exception e){
             e.printStackTrace();
         }
-        return bankAccounts;
+        if(bankAccounts != null && bankAccounts.size() > 0){
+            return bankAccounts;
+        }
+        return null;
     }
 
     @Override
@@ -111,7 +116,39 @@ public class BankAccountDaoImpl implements BankAccountDao{
         }catch (Exception e){
             e.printStackTrace();
         }
-        return bankAccounts;
+        if(bankAccounts != null && bankAccounts.size() > 0){
+            return bankAccounts;
+        }
+        return null;
+    }
+
+    @Override
+    public String getCardTypeByCardNo(String cardNo) {
+        TransAccountValid taValid = new TransAccountValid();
+        if(taValid.validCardNoInSystem(cardNo) == null){
+            System.err.println("Card no " + cardNo + " don't exist in the system.");
+        }
+        PreparedStatement preSt;
+        String sql = "Select * from bank_account_table where card_no = ?";
+        List<BankAccount> bankAccounts = new ArrayList<>();
+        Connection conn = Datasource.getConn();
+        try{
+            preSt = conn.prepareStatement(sql);
+            preSt.setString(1, cardNo);
+            ResultSet rs = preSt.executeQuery();
+            while (rs.next()){
+                BankAccount bankAcc = rowMapper(rs);
+                if(!Objects.isNull(bankAcc)) bankAccounts.add(bankAcc);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if(bankAccounts != null && bankAccounts.size() >0){
+            return bankAccounts.get(0).getCardType();
+        }
+        return null;
     }
 
     public static BankAccount rowMapper(ResultSet rs){
