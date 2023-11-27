@@ -12,6 +12,7 @@ import org.aptech.t2303e.lab1.transAccount.exception.NotEnoughMoneyException;
 import org.aptech.t2303e.lab1.transAccount.service.TransAccountService;
 import org.aptech.t2303e.lab1.transAccount.service.impl.TransAccountServiceImpl;
 
+import java.io.FileNotFoundException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.Objects;
 
 public class JcbTransAccountDaoImpl implements TransAccountDao {
 
-    public static void main(String[] args) throws NotEnoughMoneyException {
+    public static void main(String[] args) throws NotEnoughMoneyException, FileNotFoundException {
         TransAccountDao jcbTransAccountDao = new JcbTransAccountDaoImpl();
         TransAccountService taService = new TransAccountServiceImpl();
 //        System.err.println(jcbTransAccountDao.findAmountWithTransIdMax("123456789123"));
@@ -30,10 +31,15 @@ public class JcbTransAccountDaoImpl implements TransAccountDao {
 //        boolean result = jcbTransAccountDao.insertTransAccountDeposit(jcbTransAcc, 150000);
 //        boolean result = jcbTransAccountDao.insertTransAccountWithDraw(jcbTransAcc, 150000);
 //        if(result) System.err.println("Insert success.");
-        String cardType = "JCB";
-        String fileName = "./etc/" + cardType + "_trans_account_table.txt";
-        List<TransAccount> jcbTransAccs = jcbTransAccountDao.findAll("JCB");
-        taService.insertFile(jcbTransAccs, fileName);
+//        String cardType = "JCB";
+//        String fileName = "./etc/" + cardType + "_trans_account_table.txt";
+//        List<TransAccount> jcbTransAccs = jcbTransAccountDao.findAll("JCB");
+//        taService.insertFile(jcbTransAccs, fileName);
+//        taService.readFile("./etc/trans_account_table.txt");
+//        String fileName = "./etc/trans_account_table.txt";
+//        List<TransAccount> jcbTransAccs = jcbTransAccountDao.findAll();
+//        taService.insertFile(jcbTransAccs, fileName);
+        jcbTransAccountDao.insertTransAccountFromFile("./etc/trans_account_table.txt");
     }
 
     @Override
@@ -101,6 +107,39 @@ public class JcbTransAccountDaoImpl implements TransAccountDao {
     }
 
     @Override
+    public boolean insertTransAccountFromFile(String url) throws FileNotFoundException {
+        TransAccountService taService = new TransAccountServiceImpl();
+        List<TransAccount> transAccounts = taService.readFile(url);
+        TransAccountValid taValid = new TransAccountValid();
+
+        for (int i = 0; i < transAccounts.size(); i++) {
+            if(taValid.validCardNoInSystem(transAccounts.get(i).getCardNo()) == null){
+                System.err.println("Card no : " + transAccounts.get(i).getCardNo() + " doesn't exist in the system.");
+                continue;
+            }
+            PreparedStatement preSt;
+            String sql = "Insert into trans_account_table2(card_no, amount, trans_date_time)" +
+                    "values(?, ?, ?)";
+            Connection conn = Datasource.getConn();
+            try{
+                preSt = conn.prepareStatement(sql);
+                preSt.setString(1, transAccounts.get(i).getCardNo());
+                preSt.setDouble(2, transAccounts.get(i).getAmount());
+                Timestamp timestamp = Timestamp.valueOf(transAccounts.get(i).getTransDateTime());
+                preSt.setTimestamp(3, timestamp);
+                preSt.execute();
+                return true;
+            }catch (SQLException e){
+                e.printStackTrace();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return false;
+        }
+        return false;
+    }
+
+    @Override
     public TransAccount findAmountWithTransIdMax(String cardNo) {
         BankAccountDao baDao = new BankAccountDaoImpl();
         if(!baDao.getCardTypeByCardNo(cardNo).equals("JCB")){
@@ -132,7 +171,7 @@ public class JcbTransAccountDaoImpl implements TransAccountDao {
     }
 
     @Override
-    public List<TransAccount> findAll(String cardType) {
+    public List<TransAccount> findAllByCardType(String cardType) {
         BankAccountValid baValid = new BankAccountValid();
         if(baValid.validCardType(cardType) == null) return null;
         PreparedStatement preSt;
@@ -144,6 +183,28 @@ public class JcbTransAccountDaoImpl implements TransAccountDao {
         try{
             preSt = conn.prepareStatement(sql);
             preSt.setString(1, cardType);
+            ResultSet rs = preSt.executeQuery();
+            while (rs.next()){
+                TransAccount acc = rowMapper(rs);
+                if (!Objects.isNull(acc)) jcbTransAccounts.add(acc);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return jcbTransAccounts;
+    }
+
+    @Override
+    public List<TransAccount> findAll() {
+        BankAccountValid baValid = new BankAccountValid();
+        PreparedStatement preSt;
+        String sql = "Select * from trans_account_table";
+        List<TransAccount> jcbTransAccounts = new ArrayList<>();
+        Connection conn = Datasource.getConn();
+        try{
+            preSt = conn.prepareStatement(sql);
             ResultSet rs = preSt.executeQuery();
             while (rs.next()){
                 TransAccount acc = rowMapper(rs);

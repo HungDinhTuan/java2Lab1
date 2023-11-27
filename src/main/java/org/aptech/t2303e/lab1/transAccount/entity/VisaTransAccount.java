@@ -12,6 +12,7 @@ import org.aptech.t2303e.lab1.transAccount.dao.impl.VisaTransAccountDaoImpl;
 import org.aptech.t2303e.lab1.transAccount.exception.NotEnoughMoneyException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @SuperBuilder
@@ -21,21 +22,20 @@ public class VisaTransAccount extends TransAccount{
     private static final double CREDIT_LIMIT = 10000000;
 
     @Override
-    public double deposit(double depositNum) {
+    public double deposit(double depositNum) throws NotEnoughMoneyException{
         TransAccountDao visaTransAccDao = new VisaTransAccountDaoImpl();
         BankAccountDao baDao = new BankAccountDaoImpl();
 
         if(visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null && depositNum <= 0){
-            System.err.println("Can't make transaction with new card no : " + getCardNo() +
+            throw new NotEnoughMoneyException("Can't make transaction with new card no : " + getCardNo() +
                     " and the with draw can't be the non-negative number : " + depositNum);
-            return visaTransAccDao.findAmountWithTransIdMax(getCardNo()).deposit(depositNum);
         }else if (visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null &&
                 !baDao.getCardTypeByCardNo(getCardNo()).equals("VISA")) {
-            System.err.println("Card no : " + getCardNo() + " is " +
+            throw new NotEnoughMoneyException("Card no : " + getCardNo() + " is " +
                     baDao.getCardTypeByCardNo(getCardNo()) + " card type.");
-            return visaTransAccDao.findAmountWithTransIdMax(getCardNo()).deposit(depositNum);
         }else if (visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null) {
-            return depositNum;
+            super.setAmount(depositNum);
+            return getAmount();
         }
         super.setAmount(visaTransAccDao.findAmountWithTransIdMax(getCardNo()).getAmount() + depositNum);
         return getAmount();
@@ -46,16 +46,22 @@ public class VisaTransAccount extends TransAccount{
         System.out.println("With draw from account : " + getCardNo() + ", card type : " + CARD_TYPE);
         TransAccountDao visaTransAccDao = new VisaTransAccountDaoImpl();
         BankAccountDao baDao = new BankAccountDaoImpl();
+        List<VisaTransAccount> visaTransAccs = VisaTransAccountDaoImpl.listVisaTransByCardNo(getCardNo());
+
+        LocalDateTime cardActiveDate = visaTransAccs.get(0).getTransDateTime();
+        LocalDateTime maxIndexDate = visaTransAccs.get(visaTransAccs.size()).getTransDateTime();
+
+        int day = cardActiveDate.getDayOfMonth();
+        int month = maxIndexDate.getMonthValue();
+        int year = maxIndexDate.getYear();
 
         if(visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null && withdrawNum <= 0){
-            System.err.println("Can't make transaction with new card no : " + getCardNo() +
+            throw new NotEnoughMoneyException("Can't make transaction with new card no : " + getCardNo() +
                     " and the with draw can't be the non-negative number : " + withdrawNum);
-            return visaTransAccDao.findAmountWithTransIdMax(getCardNo()).withDraw(withdrawNum);
         } else if (visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null &&
-                !baDao.getCardTypeByCardNo(getCardNo()).equals("JCB")) {
-            System.err.println("Card no : " + getCardNo() + " is " +
+                !baDao.getCardTypeByCardNo(getCardNo()).equals("VISA")) {
+            throw new NotEnoughMoneyException("Card no : " + getCardNo() + " is " +
                     baDao.getCardTypeByCardNo(getCardNo()) + " card type.");
-            return visaTransAccDao.findAmountWithTransIdMax(getCardNo()).withDraw(withdrawNum);
         }else if (visaTransAccDao.findAmountWithTransIdMax(getCardNo()) == null) {
             throw new NotEnoughMoneyException("Not enough money, card no : " + getCardNo() +
                     ", balance : " + getAmount() + ", with draw : " + withdrawNum +
@@ -65,19 +71,5 @@ public class VisaTransAccount extends TransAccount{
         }
         super.setAmount(visaTransAccDao.findAmountWithTransIdMax(getCardNo()).getAmount() - withdrawNum);
         return getAmount();
-
-//        if(getAmount() + CREDIT_LIMIT  < num){
-//            throw new NotEnoughMoneyException("The account has maxed out its credit limit, account number : " + getCardNo()
-//                    + ", balance : " + (getAmount() + CREDIT_LIMIT) + " VND with draw : " + num +
-//                    ", time stamp : " + LocalDateTime.now());
-//        }
-//        super.setAmount(getAmount() - num);
-//        return getAmount();
-    }
-
-    public static void main(String[] args) throws NotEnoughMoneyException {
-        VisaTransAccount visaTransAccount = new VisaTransAccount();
-        visaTransAccount.withDraw(50000000);
-        System.err.println(visaTransAccount.getAmount());
     }
 }

@@ -95,6 +95,11 @@ public class VisaTransAccountDaoImpl implements TransAccountDao {
     }
 
     @Override
+    public boolean insertTransAccountFromFile(String url) {
+        return false;
+    }
+
+    @Override
     public VisaTransAccount findAmountWithTransIdMax(String cardNo) {
         BankAccountDao baDao = new BankAccountDaoImpl();
         if(!baDao.getCardTypeByCardNo(cardNo).equals("VISA")){
@@ -126,14 +131,16 @@ public class VisaTransAccountDaoImpl implements TransAccountDao {
     }
 
     @Override
-    public List<TransAccount> findAll(String cardType) {
+    public List<TransAccount> findAllByCardType(String cardType) {
         BankAccountValid baValid = new BankAccountValid();
         if(baValid.validCardType(cardType) == null) return null;
         PreparedStatement preSt;
-        String sql = "Select trans_account_table.trans_id, trans_account_table.card_no, trans_account_table.amount, trans_account_table.trans_date_time, trans_account_table.card_no\n" +
-                "from trans_account_table INNER JOIN bank_account_table ON trans_account_table.card_no=bank_account_table.card_no\n" +
+        String sql = "Select trans_account_table.trans_id, trans_account_table.card_no, trans_account_table.amount, " +
+                "trans_account_table.trans_date_time, trans_account_table.card_no " +
+                "from trans_account_table INNER JOIN bank_account_table " +
+                "ON trans_account_table.card_no=bank_account_table.card_no " +
                 "WHERE bank_account_table.card_type = ?";
-        List<TransAccount> jcbTransAccounts = new ArrayList<>();
+        List<TransAccount> visaTransAccounts = new ArrayList<>();
         Connection conn = Datasource.getConn();
         try{
             preSt = conn.prepareStatement(sql);
@@ -141,14 +148,46 @@ public class VisaTransAccountDaoImpl implements TransAccountDao {
             ResultSet rs = preSt.executeQuery();
             while (rs.next()){
                 TransAccount acc = rowMapper(rs);
-                if (!Objects.isNull(acc)) jcbTransAccounts.add(acc);
+                if (!Objects.isNull(acc)) visaTransAccounts.add(acc);
             }
         }catch (SQLException e){
             e.printStackTrace();
         }catch (Exception e){
             e.printStackTrace();
         }
-        return jcbTransAccounts;
+        return visaTransAccounts;
+    }
+
+    public static List<VisaTransAccount> listVisaTransByCardNo(String cardNo) {
+        BankAccountValid baValid = new BankAccountValid();
+        TransAccountValid taValid = new TransAccountValid();
+        if(!taValid.validCardNoInSystem(cardNo).equals("VISA")){
+            System.err.println("Card no : " + cardNo + "isn't the Visa card type.");
+            return null;
+        }
+        PreparedStatement preSt;
+        String sql = "Select * from trans_account_table where card_no = ?";
+        List<VisaTransAccount> visaTransAccounts = new ArrayList<>();
+        Connection conn = Datasource.getConn();
+        try{
+            preSt = conn.prepareStatement(sql);
+            preSt.setString(1, cardNo);
+            ResultSet rs = preSt.executeQuery();
+            while (rs.next()){
+                VisaTransAccount acc = rowMapper(rs);
+                if (!Objects.isNull(acc)) visaTransAccounts.add(acc);
+            }
+        }catch (SQLException e){
+            e.printStackTrace();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return visaTransAccounts;
+    }
+
+    @Override
+    public List<TransAccount> findAll() {
+        return null;
     }
 
     public static VisaTransAccount rowMapper(ResultSet rs) {

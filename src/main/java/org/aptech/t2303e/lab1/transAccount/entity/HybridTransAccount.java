@@ -22,21 +22,20 @@ public class HybridTransAccount extends TransAccount{
     private static final double FEE_WITH_DRAW = 1000;
 
     @Override
-    public double deposit(double depositNum) {
+    public double deposit(double depositNum) throws NotEnoughMoneyException{
         TransAccountDao hybridTransAccDao = new HybridTransAccountDaoImpl();
         BankAccountDao baDao = new BankAccountDaoImpl();
 
         if(hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null && depositNum <= 0){
-            System.err.println("Can't make transaction with new card no : " + getCardNo() +
+            throw new NotEnoughMoneyException("Can't make transaction with new card no : " + getCardNo() +
                     " and the with draw can't be the non-negative number : " + depositNum);
-            return hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).deposit(depositNum);
         }else if (hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null &&
                 !baDao.getCardTypeByCardNo(getCardNo()).equals("HYBRID")) {
-            System.err.println("Card no : " + getCardNo() + " is " +
+            throw new NotEnoughMoneyException("Card no : " + getCardNo() + " is " +
                     baDao.getCardTypeByCardNo(getCardNo()) + " card type.");
-            return hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).deposit(depositNum);
         }else if (hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null) {
-            return depositNum;
+            super.setAmount(depositNum);
+            return getAmount();
         }
         super.setAmount(hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).getAmount() + depositNum);
         return getAmount();
@@ -49,14 +48,12 @@ public class HybridTransAccount extends TransAccount{
         BankAccountDao baDao = new BankAccountDaoImpl();
 
         if(hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null && withdrawNum <= 0){
-            System.err.println("Can't make transaction with new card no : " + getCardNo() +
+            throw new NotEnoughMoneyException("Can't make transaction with new card no : " + getCardNo() +
                     " and the with draw can't be the non-negative number : " + withdrawNum);
-            return hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).withDraw(withdrawNum);
         } else if (hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null &&
-                !baDao.getCardTypeByCardNo(getCardNo()).equals("JCB")) {
-            System.err.println("Card no : " + getCardNo() + " is " +
+                !baDao.getCardTypeByCardNo(getCardNo()).equals("HYBRID")) {
+            throw new NotEnoughMoneyException("Card no : " + getCardNo() + " is " +
                     baDao.getCardTypeByCardNo(getCardNo()) + " card type.");
-            return hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).withDraw(withdrawNum);
         }else if (hybridTransAccDao.findAmountWithTransIdMax(getCardNo()) == null) {
             throw new NotEnoughMoneyException("Not enough money, card no : " + getCardNo() +
                     ", balance : " + getAmount() + ", with draw : " + withdrawNum +
@@ -69,11 +66,4 @@ public class HybridTransAccount extends TransAccount{
         super.setAmount(hybridTransAccDao.findAmountWithTransIdMax(getCardNo()).getAmount() - withdrawNum - FEE_WITH_DRAW);
         return getAmount();
     }
-
-//    public static void main(String[] args) throws NotEnoughMoneyException {
-//        HybridTransAccount hybridTransAccount = new HybridTransAccount();
-//        hybridTransAccount.deposit(1500000);
-//        hybridTransAccount.withDraw(1000000);
-//        System.err.println(hybridTransAccount.getAmount());
-//    }
 }

@@ -7,10 +7,9 @@ public class TransAccountValid {
     BankAccountDao bankAcc = new BankAccountDaoImpl();
 
     public String validCardNoInSystem(String cardNo){
-
-        for (int i = 0; i <bankAcc.getAllBankAcc().size() ; i++) {
+        for (int i = 0; i < bankAcc.getAllBankAcc().size() ; i++) {
             if(bankAcc.getAllBankAcc().get(i).getCardNo().equals(cardNo)){
-                return bankAcc.getAllBankAcc().get(i).getCardType();
+                return bankAcc.getAllBankAcc().get(i).getCardNo();
             }
         }
         return null;

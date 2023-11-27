@@ -133,7 +133,6 @@ public class BankAccountValid {
         }else if (month < 9 && day < 9) {
             stringDate = year + "-0" + month + "-0" + day;
         }
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date date = dateFormat.parse(stringDate);
@@ -141,6 +140,11 @@ public class BankAccountValid {
         }catch (ParseException e){
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public Date validHourMinuteSecond(int hour, int minute, int second){
+
         return null;
     }
 
